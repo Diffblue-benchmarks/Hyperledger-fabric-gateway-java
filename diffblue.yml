@@ -1,0 +1,438 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 28.0
+#  >methods=10
+#  >complexity=28
+#  >construction=3.0
+#  >dependency=3.0
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/OrderedBlockEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/OrderedBlockEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/BlockEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/BlockEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ListenerSet.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ListenerSet.java
+# Target TGF: 32.0
+#  >methods=9
+#  >complexity=32
+#  >construction=3.0
+#  >dependency=3.0
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ListenerSet.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ListenerSet.java
+# Target TGF: 28.0
+#  >methods=7
+#  >complexity=28
+#  >construction=3.0
+#  >dependency=3.0
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/TransactionEventSourceImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/TransactionEventSourceImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/BlockEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/BlockEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ListenerSet.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ListenerSet.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/TransactionEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/TransactionEventSource.java
+# Target TGF: 67.5
+#  >methods=9
+#  >complexity=90
+#  >construction=4.25
+#  >dependency=5.0
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/ContractImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/ContractImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/Contract.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/Contract.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/Transaction.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/Transaction.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/TransactionImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/TransactionImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/NetworkImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/NetworkImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ContractEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ContractEventSource.java
+# Target TGF: 315.908333333
+#  >methods=10
+#  >complexity=535
+#  >construction=15.0
+#  >dependency=2.86666666667
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/FileSystemWallet.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/FileSystemWallet.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/Wallet$Identity.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/Wallet.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/GatewayException.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/GatewayException.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/Wallet.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/Wallet.java
+# Target TGF: 31.1515151515
+#  >methods=9
+#  >complexity=245
+#  >construction=2.5
+#  >dependency=2.25757575758
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/TransactionImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/TransactionImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/spi/QueryHandler.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/spi/QueryHandler.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/Transaction.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/Transaction.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/TimePeriod.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/TimePeriod.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/QueryImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/QueryImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/GatewayException.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/GatewayException.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/spi/CommitHandlerFactory.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/spi/CommitHandlerFactory.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/spi/CommitHandler.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/spi/CommitHandler.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/ContractImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/ContractImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/GatewayImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/GatewayImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/NetworkImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/NetworkImpl.java
+# Target TGF: 36.0
+#  >methods=9
+#  >complexity=97
+#  >construction=4.0
+#  >dependency=1.91666666667
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/CommitHandlerImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/CommitHandlerImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/TransactionEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/TransactionEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/GatewayException.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/GatewayException.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/CompositePeerDisconnectListener.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/CompositePeerDisconnectListener.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/PeerDisconnectEventSourceFactory.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/PeerDisconnectEventSourceFactory.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/spi/CommitHandler.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/spi/CommitHandler.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/Network.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/Network.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/PeerDisconnectEvent.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/PeerDisconnectEvent.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/CommitStrategy.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/CommitStrategy.java
+# Target TGF: 32.0
+#  >methods=8
+#  >complexity=32
+#  >construction=3.0
+#  >dependency=3.0
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ChannelBlockEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ChannelBlockEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/BlockEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/BlockEventSource.java
+# Target TGF: 45.25
+#  >methods=13
+#  >complexity=121
+#  >construction=2.75
+#  >dependency=5.0
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/NetworkImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/NetworkImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/PeerTracker.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/PeerTracker.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/BlockEventSourceFactory.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/BlockEventSourceFactory.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/TransactionEventSourceImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/TransactionEventSourceImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/Network.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/Network.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/ContractImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/ContractImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/GatewayImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/GatewayImpl.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/OrderedBlockEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/OrderedBlockEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ContractEventSourceFactory.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ContractEventSourceFactory.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/BlockEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/BlockEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/spi/QueryHandlerFactory.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/spi/QueryHandlerFactory.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/GatewayException.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/GatewayException.java
+# Target TGF: 40.0
+#  >methods=10
+#  >complexity=40
+#  >construction=3.0
+#  >dependency=3.0
+ - target:
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ChannelContractEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ChannelContractEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ContractEventSource.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ContractEventSource.java
+   - dir: target/classes
+     file: org/hyperledger/fabric/gateway/impl/event/ContractEventImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/hyperledger/fabric/gateway/impl/event/ContractEventImpl.java
